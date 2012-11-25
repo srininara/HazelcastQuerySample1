@@ -1,0 +1,52 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.nacnez.projects.hazelcast.query</groupId>
+	<artifactId>HazelcastQuerySample1</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<repositories>
+		<repository>
+			<id>local</id>
+			<url>file:${basedir}/repository</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency> <!-- local dependency in repository -->
+			<groupId>JSci</groupId>
+			<artifactId>jsci-core</artifactId>
+			<version>0.945</version>
+		</dependency>
+		<dependency> <!-- local dependency in repository -->
+			<groupId>mt</groupId>
+			<artifactId>mt</artifactId>
+			<version>13</version>
+		</dependency>
+		<dependency> <!-- local dependency in repository -->
+			<groupId>bb</groupId>
+			<artifactId>bb</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.hazelcast</groupId>
+			<artifactId>hazelcast</artifactId>
+			<version>2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.nacnez.util.</groupId>
+			<artifactId>modelgen</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.nacnez.util</groupId>
+			<artifactId>microbenchmarktool</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+</project>
