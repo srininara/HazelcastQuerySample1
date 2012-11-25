@@ -68,12 +68,7 @@ public class QueryNode {
 				.report();
 
 		// Using Distributed Executor
-//		TimedTask distTask = new PersonDistExecTask(instance,
-//				"Bangalore People");
-//		newSimpleExecutor().with(newSimpleStandardOutputReporter())
-//				.execute(distTask, 10).report();
 		Reducer<Integer> reducer = new Reducer<Integer>() {
-
 			public Integer reduce(Collection<Integer> results) {
 				int execResult = 0;
 				for (int result : results) {
@@ -85,7 +80,6 @@ public class QueryNode {
 		};
 
 		CloneMaker<Integer> cloneMaker = new CloneMaker<Integer>() {
-
 			public TimedTask make(HazelcastInstance instance, String name,
 					Callable<Integer> filter, Reducer<Integer> reducer,
 					CloneMaker<Integer> cloneMaker) {
@@ -100,10 +94,6 @@ public class QueryNode {
 				"Bangalore People", new PersonFilter(), reducer, cloneMaker);
 		newSimpleExecutor().with(newSimpleStandardOutputReporter())
 		.execute(disttTask, 10).report();
-
-		// PersonDistTaskCallable pcall = new PersonDistTaskCallable(instance);
-		// Benchmark bm = new Benchmark(pcall);
-		// System.out.println(bm.toStringFull());
 
 		// Using SQL Predicate
 		// TimedTask query = new PersonQueryTask(getCache(),"Person Query");
