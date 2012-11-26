@@ -1,7 +1,7 @@
 package com.nacnez.projects.hazelcast.query.sample1;
 
 import static com.nacnez.projects.grid.modelCreator.DataCreator.createData;
-import static com.nacnez.projects.hazelcast.query.sample1.distributed.TaskMaker.makeBangalorePeopleFilterTask;
+import static com.nacnez.projects.hazelcast.query.sample1.distributed.TaskMaker.*;
 import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newSimpleExecutor;
 import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newSimpleStandardOutputReporter;
 import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newStandardOutputReporter;
@@ -67,7 +67,9 @@ public class QueryNode {
 
 		// Using Distributed Executor
 //		TimedTask distTask = makeBangalorePeopleCountFilterTask(instance);
-		TimedTask distTask = makeBangalorePeopleFilterTask(instance);
+//		TimedTask distTask = makeBangalorePeopleFilterTask(instance);
+//		TimedTask distTask = makeAverageLadySalaryFilterTask(instance);
+		TimedTask distTask = makeGMTClosePeopleFilterTask(instance);
 		newSimpleExecutor().with(newSimpleStandardOutputReporter())
 		.execute(distTask, 10).report();
 
@@ -79,7 +81,7 @@ public class QueryNode {
 	}
 
 	void createPersons() {
-		data = createData(12000);
+		data = createData(10000);
 	}
 
 	private void fillDataGrid(Collection<Person> data) {
