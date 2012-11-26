@@ -48,5 +48,10 @@
 			<artifactId>microbenchmarktool</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.nacnez.projects.grid.model</groupId>
+			<artifactId>GridModelGeneration</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 </project>

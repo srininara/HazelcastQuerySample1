@@ -1,4 +1,4 @@
-package com.nacnez.projects.hazelcast.query.sample1;
+package com.nacnez.projects.hazelcast.query.sample1.distributed;
 
 import java.util.concurrent.Callable;
 

@@ -1,10 +1,10 @@
-package com.nacnez.projects.hazelcast.query.sample1;
+package com.nacnez.projects.hazelcast.query.sample1.alternate;
 
 import java.util.Set;
 
 import com.hazelcast.core.IMap;
 import com.hazelcast.query.SqlPredicate;
-import com.nacnez.projects.hazelcast.query.sample1.model.Person;
+import com.nacnez.projects.grid.model.Person;
 import com.nacnez.util.microbenchmarktool.TimedTask;
 import com.nacnez.util.microbenchmarktool.core.PrototypeTimedTask;
 

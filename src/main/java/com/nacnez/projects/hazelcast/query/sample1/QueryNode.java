@@ -1,27 +1,25 @@
 package com.nacnez.projects.hazelcast.query.sample1;
 
-import static com.nacnez.projects.hazelcast.query.sample1.DataCreator.createData;
+import static com.nacnez.projects.grid.modelCreator.DataCreator.createData;
+import static com.nacnez.projects.hazelcast.query.sample1.distributed.TaskMaker.makeBangalorePeopleFilterTask;
 import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newSimpleExecutor;
 import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newSimpleStandardOutputReporter;
 import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newStandardOutputReporter;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import com.nacnez.projects.hazelcast.query.sample1.model.Person;
+import com.nacnez.projects.grid.model.Person;
 import com.nacnez.util.microbenchmarktool.TimedTask;
 import com.nacnez.util.microbenchmarktool.core.SingletonTimedTask;
 
 public class QueryNode {
 
-	private HazelcastInstance instance;
-
-	private Collection<Person> data;
-
-	private IMap<String, Person> cache;
+	public HazelcastInstance instance;
+	public Collection<Person> data;
+	public IMap<String, Person> cache;
 
 	public static void main(String[] args) throws Exception {
 		QueryNode qnode = new QueryNode();
@@ -68,32 +66,10 @@ public class QueryNode {
 				.report();
 
 		// Using Distributed Executor
-		Reducer<Integer> reducer = new Reducer<Integer>() {
-			public Integer reduce(Collection<Integer> results) {
-				int execResult = 0;
-				for (int result : results) {
-					execResult = execResult + result;
-				}
-				return execResult;
-			}
-
-		};
-
-		CloneMaker<Integer> cloneMaker = new CloneMaker<Integer>() {
-			public TimedTask make(HazelcastInstance instance, String name,
-					Callable<Integer> filter, Reducer<Integer> reducer,
-					CloneMaker<Integer> cloneMaker) {
-				return new DistributedExecTask<Integer>(instance,
-						"Bangalore People", new PersonFilter(), reducer,
-						cloneMaker);
-			}
-
-		};
-
-		TimedTask disttTask = new DistributedExecTask<Integer>(instance,
-				"Bangalore People", new PersonFilter(), reducer, cloneMaker);
+//		TimedTask distTask = makeBangalorePeopleCountFilterTask(instance);
+		TimedTask distTask = makeBangalorePeopleFilterTask(instance);
 		newSimpleExecutor().with(newSimpleStandardOutputReporter())
-		.execute(disttTask, 10).report();
+		.execute(distTask, 10).report();
 
 		// Using SQL Predicate
 		// TimedTask query = new PersonQueryTask(getCache(),"Person Query");

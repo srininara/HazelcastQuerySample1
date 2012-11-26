@@ -1,4 +1,4 @@
-package com.nacnez.projects.hazelcast.query.sample1;
+package com.nacnez.projects.hazelcast.query.sample1.alternate;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.MultiTask;
+import com.nacnez.projects.hazelcast.query.sample1.filter.BangalorePersonCountFilter;
 
 public class PersonDistTaskCallable implements Callable<Integer> {
 
@@ -19,7 +20,7 @@ public class PersonDistTaskCallable implements Callable<Integer> {
 		int execResult = 0;
 		try {
 			MultiTask<Integer> task = new MultiTask<Integer>(
-					new PersonFilter(), instance.getCluster().getMembers());
+					new BangalorePersonCountFilter(), instance.getCluster().getMembers());
 			ExecutorService executorService = instance.getExecutorService();
 			executorService.execute(task);
 			Collection<Integer> results = task.get();
