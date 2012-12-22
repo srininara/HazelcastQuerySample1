@@ -24,7 +24,7 @@ public class GMTClosePersonFilter implements Callable<Collection<Person>>,
 	
 	public Collection<Person> call() throws Exception {
 		IMap<String,Person> cache = instance.getMap("persons");
- 		Set<String> localKeys = cache.localKeySet(new SqlPredicate("address.currentLocation.longitude BETWEEN -10.00 AND 10.00"));
+ 		Set<String> localKeys = cache.localKeySet(new SqlPredicate("address.currentLocation.longitude >= -0 AND address.currentLocation.longitude <= 60"));
  		Collection<Person> gmtClosePeople = cache.getAll(localKeys).values();
 		return new HashSet<Person>(gmtClosePeople);
 	}

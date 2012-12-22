@@ -1,9 +1,9 @@
 package com.nacnez.projects.hazelcast.query.sample1;
 
 import static com.nacnez.projects.grid.modelCreator.DataCreator.createData;
-import static com.nacnez.projects.hazelcast.query.sample1.distributed.TaskMaker.*;
+import static com.nacnez.projects.hazelcast.query.sample1.distributed.TaskMaker.makeBangalorePeopleFilterTask;
+import static com.nacnez.projects.hazelcast.query.sample1.distributed.TaskMaker.makeOnePageBangalorePeopleFilterTask;
 import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newSimpleExecutor;
-import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newSimpleStandardOutputReporter;
 import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newStandardOutputReporter;
 
 import java.util.Collection;
@@ -60,18 +60,52 @@ public class QueryNode {
 				return false;
 			}
 		};
+		
 		newSimpleExecutor().with(newStandardOutputReporter())
-				.execute(generator).report();
-		newSimpleExecutor().with(newStandardOutputReporter()).execute(filler)
-				.report();
+				.execute(generator, 1).report();
+		newSimpleExecutor().with(newStandardOutputReporter())
+				.execute(filler, 1).report();
 
+		newSimpleExecutor().with(newStandardOutputReporter())
+		.execute(makeBangalorePeopleFilterTask(instance), 1).report();
+
+		newSimpleExecutor().with(newStandardOutputReporter())
+		.execute(makeOnePageBangalorePeopleFilterTask(instance), 1).report();
+
+		//		newSimpleExecutor().with(newStandardOutputReporter())
+//		.execute(makeCancellableBangalorePeopleFilterTask(instance), 1).report();
+		//		newSimpleExecutor().with(newStandardOutputReporter())
+//		.execute(makeTimeWastingTask(instance), 1).report();
+
+		
+		
+		//		Thread.sleep(5000);
+
+//		newSimpleExecutor().with(newStandardOutputReporter())
+//		.execute(makeBangalorePeopleCountFilterTask(instance), 1).report();
+		
 		// Using Distributed Executor
-//		TimedTask distTask = makeBangalorePeopleCountFilterTask(instance);
-//		TimedTask distTask = makeBangalorePeopleFilterTask(instance);
-//		TimedTask distTask = makeAverageLadySalaryFilterTask(instance);
-		TimedTask distTask = makeGMTClosePeopleFilterTask(instance);
-		newSimpleExecutor().with(newSimpleStandardOutputReporter())
-		.execute(distTask, 10).report();
+		// newSimpleExecutor().with(newStatRichSimpleStandardOutputReporter())
+		// .execute(makeBangalorePeopleCountFilterTask(instance), 50)
+		// .report();
+		// newSimpleExecutor().with(newStatRichSimpleStandardOutputReporter())
+		// .execute(makeBangalorePeopleFilterTask(instance), 50).report();
+		// newSimpleExecutor().with(newStatRichSimpleStandardOutputReporter())
+		// .execute(makeAverageLadySalaryFilterTask(instance), 50)
+		// .report();
+		// newSimpleExecutor().with(newStatRichSimpleStandardOutputReporter())
+		// .execute(makeGMTClosePeopleFilterTask(instance), 50).report();
+
+//		newSimpleExecutor().with(newStatRichStandardOutputReporter())
+//				.execute(makeBangalorePeopleCountFilterTask(instance), 50)
+//				.report();
+//		newSimpleExecutor().with(newStatRichStandardOutputReporter())
+//				.execute(makeBangalorePeopleFilterTask(instance), 50).report();
+//		newSimpleExecutor().with(newStatRichStandardOutputReporter())
+//				.execute(makeAverageLadySalaryFilterTask(instance), 50)
+//				.report();
+//		newSimpleExecutor().with(newStatRichStandardOutputReporter())
+//				.execute(makeGMTClosePeopleFilterTask(instance), 2).report();
 
 		// Using SQL Predicate
 		// TimedTask query = new PersonQueryTask(getCache(),"Person Query");
@@ -81,19 +115,36 @@ public class QueryNode {
 	}
 
 	void createPersons() {
-		data = createData(10000);
+		data = createData(1000);
 	}
 
 	private void fillDataGrid(Collection<Person> data) {
 		Map<String, Person> personCache = getCache();
-		int filterCount = 0;
+		int personfilterCount = 0;
+		int generatedDataBasedExpectedCountLadyAvg = 0;
+		Double generatedDataBasedExpectedSalLadyAvg = new Double(0.0);
+		int generatedDataBasedExpectedCountGMT = 0;
+		Double lowVal = new Double(-0);
+		Double hiVal = new Double(60);
+
 		for (Person person : data) {
 			if (person.getCity().equals("Bangalore")) {
-				filterCount++;
+				personfilterCount++;
 			}
+			if ("Female".equals(person.getGender()) && person.getIncome().compareTo(new Double(10000))>=0) {
+				generatedDataBasedExpectedSalLadyAvg = generatedDataBasedExpectedSalLadyAvg + person.getIncome();
+				generatedDataBasedExpectedCountLadyAvg++;
+			}
+			Double longitude = person.getAddress().getCurrentLocation().getLongitude();
+			if (longitude.compareTo(lowVal)>=0 && longitude.compareTo(hiVal)<=0) {
+				generatedDataBasedExpectedCountGMT++;
+			}
+			
 			personCache.put(person.getUniqueId(), person);
 		}
-		System.out.println("Expected Result: " + filterCount);
+//		System.out.println("Expected Result Bangalore Person: " + personfilterCount);
+//		System.out.println("Expected Result Lady Avg Sal: " + generatedDataBasedExpectedSalLadyAvg/generatedDataBasedExpectedCountLadyAvg);
+//		System.out.println("Expected Result GMT Person: " + generatedDataBasedExpectedCountGMT);
 
 	}
 
@@ -102,6 +153,8 @@ public class QueryNode {
 			cache = instance.getMap("persons");
 			// Indexing code start
 			cache.addIndex("city", false);
+			cache.addIndex("income", false);
+			cache.addIndex("address.currentLocation.longitude", false);
 			// Indexing code end
 		}
 		return cache;
