@@ -69,7 +69,7 @@ public class DistributedExecTask<T>  extends PrototypeTimedTask {
 	}
 
 	public boolean idemPotent() {
-		return false;
+		return true;
 	}
 
 }

@@ -8,7 +8,7 @@ import com.nacnez.projects.grid.model.Person;
 import com.nacnez.projects.hazelcast.query.sample1.extend.CancellationConstraint;
 import com.nacnez.projects.hazelcast.query.sample1.filter.BangalorePersonCountFilter;
 import com.nacnez.projects.hazelcast.query.sample1.filter.BangalorePersonFilter;
-import com.nacnez.projects.hazelcast.query.sample1.filter.GMTClosePersonFilter;
+import com.nacnez.projects.hazelcast.query.sample1.filter.IndiaClosePersonFilter;
 import com.nacnez.projects.hazelcast.query.sample1.filter.LadyAverageSalaryForFiveDigitSalaryGettersFilter;
 import com.nacnez.util.microbenchmarktool.TimedTask;
 
@@ -47,11 +47,6 @@ public abstract class TaskMaker {
 				cloneMaker);
 		return disttTask;
 	}
-
-	public static TimedTask makeOnePageBangalorePeopleFilterTask(HazelcastInstance instance) {
-		TimedTask distTask = new ResultPollingDistributedExecTask<Collection<Person>>(instance, "One Page of Bangalore People");
-		return distTask;
-	}
 	public static TimedTask makeBangalorePeopleFilterTask(
 			HazelcastInstance instance) {
 		Reducer<Collection<Person>> reducer = new Reducer<Collection<Person>>() {
@@ -83,6 +78,74 @@ public abstract class TaskMaker {
 		return distTask;
 	}
 
+	public static TimedTask makeAverageLadySalaryFilterTask(
+			HazelcastInstance instance) {
+
+		Reducer<Double> reducer = new Reducer<Double>() {
+			public Integer reduce(Collection<Double> results) {
+				Double execResult = new Double(0.0);
+				for (Double result : results) {
+					execResult = execResult + result;
+				}
+
+				Double output = execResult / results.size();
+				return output.intValue();
+			}
+
+		};
+
+		CloneMaker<Double> cloneMaker = new CloneMaker<Double>() {
+			public TimedTask make(HazelcastInstance instance, String name,
+					Callable<Double> filter, Reducer<Double> reducer,
+					CloneMaker<Double> cloneMaker) {
+				return new DistributedExecTask<Double>(instance,
+						"Average Lady Salary",
+						new LadyAverageSalaryForFiveDigitSalaryGettersFilter(),
+						reducer, cloneMaker);
+			}
+
+		};
+
+		TimedTask disttTask = new DistributedExecTask<Double>(instance,
+				"Average Lady Salary",
+				new LadyAverageSalaryForFiveDigitSalaryGettersFilter(),
+				reducer, cloneMaker);
+		return disttTask;
+	}
+
+	public static TimedTask makeIndiaClosePeopleFilterTask(
+			HazelcastInstance instance) {
+		Reducer<Collection<Person>> reducer = new Reducer<Collection<Person>>() {
+			public Integer reduce(Collection<Collection<Person>> results) {
+				int execResult = 0;
+				for (Collection<Person> result : results) {
+					execResult = execResult + result.size();
+				}
+				return execResult;
+			}
+
+		};
+
+		CloneMaker<Collection<Person>> cloneMaker = new CloneMaker<Collection<Person>>() {
+			public TimedTask make(HazelcastInstance instance, String name,
+					Callable<Collection<Person>> filter,
+					Reducer<Collection<Person>> reducer,
+					CloneMaker<Collection<Person>> cloneMaker) {
+				return new DistributedExecTask<Collection<Person>>(instance,
+						"GMT Close People", new IndiaClosePersonFilter(),
+						reducer, cloneMaker);
+			}
+
+		};
+
+		TimedTask distTask = new DistributedExecTask<Collection<Person>>(
+				instance, "GMT Close People", new IndiaClosePersonFilter(),
+				reducer, cloneMaker);
+		return distTask;
+	}
+
+	// Below are the special case tasks which were used to test cancellation
+	
 	public static TimedTask makeCancellableBangalorePeopleFilterTask(
 			HazelcastInstance instance) {
 		Reducer<Collection<Person>> reducer = new Reducer<Collection<Person>>() {
@@ -126,69 +189,9 @@ public abstract class TaskMaker {
 		return distTask;
 	}
 
-	public static TimedTask makeAverageLadySalaryFilterTask(
-			HazelcastInstance instance) {
 
-		Reducer<Double> reducer = new Reducer<Double>() {
-			public Integer reduce(Collection<Double> results) {
-				Double execResult = new Double(0.0);
-				for (Double result : results) {
-					execResult = execResult + result;
-				}
-
-				Double output = execResult / results.size();
-				return output.intValue();
-			}
-
-		};
-
-		CloneMaker<Double> cloneMaker = new CloneMaker<Double>() {
-			public TimedTask make(HazelcastInstance instance, String name,
-					Callable<Double> filter, Reducer<Double> reducer,
-					CloneMaker<Double> cloneMaker) {
-				return new DistributedExecTask<Double>(instance,
-						"Average Lady Salary",
-						new LadyAverageSalaryForFiveDigitSalaryGettersFilter(),
-						reducer, cloneMaker);
-			}
-
-		};
-
-		TimedTask disttTask = new DistributedExecTask<Double>(instance,
-				"Average Lady Salary",
-				new LadyAverageSalaryForFiveDigitSalaryGettersFilter(),
-				reducer, cloneMaker);
-		return disttTask;
-	}
-
-	public static TimedTask makeGMTClosePeopleFilterTask(
-			HazelcastInstance instance) {
-		Reducer<Collection<Person>> reducer = new Reducer<Collection<Person>>() {
-			public Integer reduce(Collection<Collection<Person>> results) {
-				int execResult = 0;
-				for (Collection<Person> result : results) {
-					execResult = execResult + result.size();
-				}
-				return execResult;
-			}
-
-		};
-
-		CloneMaker<Collection<Person>> cloneMaker = new CloneMaker<Collection<Person>>() {
-			public TimedTask make(HazelcastInstance instance, String name,
-					Callable<Collection<Person>> filter,
-					Reducer<Collection<Person>> reducer,
-					CloneMaker<Collection<Person>> cloneMaker) {
-				return new DistributedExecTask<Collection<Person>>(instance,
-						"GMT Close People", new GMTClosePersonFilter(),
-						reducer, cloneMaker);
-			}
-
-		};
-
-		TimedTask distTask = new DistributedExecTask<Collection<Person>>(
-				instance, "GMT Close People", new GMTClosePersonFilter(),
-				reducer, cloneMaker);
+	public static TimedTask makeOnePageBangalorePeopleFilterTask(HazelcastInstance instance) {
+		TimedTask distTask = new ResultPollingDistributedExecTask<Collection<Person>>(instance, "One Page of Bangalore People");
 		return distTask;
 	}
 

@@ -12,7 +12,7 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.query.SqlPredicate;
 import com.nacnez.projects.grid.model.Person;
 
-public class GMTClosePersonFilter implements Callable<Collection<Person>>,
+public class IndiaClosePersonFilter implements Callable<Collection<Person>>,
 		HazelcastInstanceAware, Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -24,7 +24,7 @@ public class GMTClosePersonFilter implements Callable<Collection<Person>>,
 	
 	public Collection<Person> call() throws Exception {
 		IMap<String,Person> cache = instance.getMap("persons");
- 		Set<String> localKeys = cache.localKeySet(new SqlPredicate("address.currentLocation.longitude >= -0 AND address.currentLocation.longitude <= 60"));
+ 		Set<String> localKeys = cache.localKeySet(new SqlPredicate("address.currentLocation.longitude >= 60 AND address.currentLocation.longitude <= 100"));
  		Collection<Person> gmtClosePeople = cache.getAll(localKeys).values();
 		return new HashSet<Person>(gmtClosePeople);
 	}
