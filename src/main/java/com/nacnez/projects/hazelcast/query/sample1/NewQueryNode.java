@@ -4,9 +4,9 @@ import static com.nacnez.projects.hazelcast.query.sample1.distributed.TaskMaker.
 import static com.nacnez.projects.hazelcast.query.sample1.distributed.TaskMaker.makeBangalorePeopleCountFilterTask;
 import static com.nacnez.projects.hazelcast.query.sample1.distributed.TaskMaker.makeBangalorePeopleFilterTask;
 import static com.nacnez.projects.hazelcast.query.sample1.distributed.TaskMaker.makeIndiaClosePeopleFilterTask;
+import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newFileOutputReporter;
 import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newSimpleExecutor;
-import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newStandardOutputReporter;
-import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newStatRichSimpleStandardOutputReporter;
+import static com.nacnez.util.microbenchmarktool.MicroBenchmarkTool.newStatRichSimpleFileOutputReporter;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -20,8 +20,10 @@ import com.nacnez.projects.hazelcast.query.sample1.dataCreation.Populator;
 import com.nacnez.util.microbenchmarktool.TimedTask;
 
 public class NewQueryNode {
-	
+
 	public static final String REPORT_BASE_PATH = "/home/narayasr/MyRoot/WorkArea/PerfBenchmarks/hazelcast/";
+
+	private static final String TXT_EXTN = ".txt";
 
 	public HazelcastInstance instance;
 	public Collection<Person> data;
@@ -40,29 +42,43 @@ public class NewQueryNode {
 	}
 
 	private void doStuff() throws Exception {
-		TimedTask generator = new Generator(1000, "Initial Generation");
-		newSimpleExecutor().with(newStandardOutputReporter())
-		.execute(generator, 1).report();
+		for (int i = 0; i < 8; i++) {
+			doTestAndMeasure(fullFileName("Test-5Nodes-" + ((i+1)*5000)+" - "));
+		}
+
+	}
+
+	private void doTestAndMeasure(String fileName) {
+		TimedTask generator = new Generator(5000, "Initial Generation");
+		newSimpleExecutor().with(newFileOutputReporter(fileName))
+				.execute(generator, 1).report();
 
 		TimedTask populator = new Populator(getCache(),
 				((Generator) generator).get(), "Initial Generation Populate");
-		newSimpleExecutor().with(newStandardOutputReporter())
+		newSimpleExecutor().with(newFileOutputReporter(fileName))
 				.execute(populator, 1).report();
-		
 
-		newSimpleExecutor().with(newStatRichSimpleStandardOutputReporter())
+		newSimpleExecutor().with(newStatRichSimpleFileOutputReporter(fileName))
 				.execute(makeBangalorePeopleCountFilterTask(instance), 50)
 				.report();
-		newSimpleExecutor().with(newStatRichSimpleStandardOutputReporter())
+		newSimpleExecutor().with(newStatRichSimpleFileOutputReporter(fileName))
 				.execute(makeBangalorePeopleFilterTask(instance), 50).report();
-		newSimpleExecutor().with(newStatRichSimpleStandardOutputReporter())
+		newSimpleExecutor().with(newStatRichSimpleFileOutputReporter(fileName))
 				.execute(makeAverageLadySalaryFilterTask(instance), 50)
 				.report();
-		newSimpleExecutor().with(newStatRichSimpleStandardOutputReporter())
+		newSimpleExecutor().with(newStatRichSimpleFileOutputReporter(fileName))
 				.execute(makeIndiaClosePeopleFilterTask(instance), 50).report();
-
 	}
-	
+
+
+	private String fullFileName(String basicName) {
+		return REPORT_BASE_PATH + basicName + nowInString() + TXT_EXTN;
+	}
+
+	public static String nowInString() {
+		return new SimpleDateFormat("yyyyMMddhhmmssSSS").format(new Date());
+	}
+
 	IMap<String, Person> getCache() {
 		if (cache == null) {
 			cache = instance.getMap("persons");
